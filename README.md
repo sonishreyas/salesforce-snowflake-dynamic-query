@@ -1,0 +1,1 @@
+# salesforce-snowflake-dynamic-query
