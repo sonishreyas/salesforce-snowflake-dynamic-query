@@ -1,0 +1,1 @@
+select id__c,name__c,project__c from trial_sales__c

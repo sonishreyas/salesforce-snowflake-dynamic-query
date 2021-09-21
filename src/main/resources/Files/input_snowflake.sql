@@ -1,0 +1,1 @@
+select * from "TRIALSNOW"."SNOWTRIAL"."COMPANY";

@@ -1,0 +1,19 @@
+http: 
+  port: "8081"
+  
+file:
+  accountDir: "" 
+
+sfdc:
+  username: ""
+  password: ""
+  token: ""
+
+snow:
+  account: ""
+  warehouse: ""
+  database: ""
+  scheme: ""
+  user: ""
+  password: ""
+  role: ""

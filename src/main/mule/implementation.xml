@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:netsuite="http://www.mulesoft.org/schema/mule/netsuite"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/netsuite http://www.mulesoft.org/schema/mule/netsuite/current/mule-netsuite.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="SalesforceQuery" doc:id="7945a7be-e3b5-4ed0-9e3a-90e939834a34" >
+		<http:listener doc:name="Listener" doc:id="a5465bf3-93f9-4f3f-97a9-ffac2b5f7692" config-ref="HTTP_Listener_config" path="/select"/>
+		<file:read doc:name="Read" doc:id="dea4131b-fb02-4adc-9787-d741118a1b8a" config-ref="File_Config" path="input_salesforce.soql"/>
+		<salesforce:query doc:name="Query" doc:id="72d9daa8-118d-4bef-8015-42871d99ef59" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[:query]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"query" : payload
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="22fa7e3c-e26a-42f1-8116-fd34b89f7c36" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d9eb9515-9c41-408a-9c2a-97513cf29ada" message="payload"/>
+	</flow>
+	<flow name="SnowflakeQuery" doc:id="9a6fefba-2626-4af0-9a6f-b3f3d3baf1e2">
+		<http:listener doc:name="Listener" doc:id="28a2f33f-5d54-42c8-854a-fa895e30337d" config-ref="HTTP_Listener_config" path="/select_snow" />
+		<file:read doc:name="Read" doc:id="62552cf6-f0ac-4d91-9837-5c007c302c83" config-ref="File_Config" path="input_snowflake.sql" />
+		<snowflake:select doc:name="Select" doc:id="9fa86a00-cf6c-463d-b7d0-44e1d85facd5" config-ref="Snowflake_Config">
+			<snowflake:sql ><![CDATA[#[payload]]]></snowflake:sql>
+			<snowflake:parameter-types />
+		</snowflake:select>
+		<ee:transform doc:name="Transform Message" doc:id="1fb07deb-6783-4be2-a174-754ab9c1f2d4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="f46730b6-1943-4424-b23b-8a1db4fd1d75" message="payload" />
+	</flow>
+</mule>
